@@ -8,6 +8,8 @@ const supabase = createClient(
 );
 
 const app = express();
+app.use(express.json());
+
 const PORT = 3000;
 
 app.get("/games", async (req, res) => {
