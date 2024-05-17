@@ -44,19 +44,19 @@ app.get("/recent-games", async (req, res) => {
 });
 
 app.get("/search-game/:query", async (req, res) => {
-
-    const { query } = req.params.query
-
+  
+    const { query } = req.params;
+   
     try {
       const { data, error } = await supabase
         .from('Games')
-        .select()
+        .select("*")
         .ilike('name', '%' + query + '%')
       if (error) {
         throw error
       }
       res.json(data);
-      
+
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
       res.status(500).json({ error: "Erro ao buscar dados" });
