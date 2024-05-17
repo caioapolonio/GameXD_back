@@ -26,6 +26,43 @@ app.get("/games", async (req, res) => {
   }
 });
 
+app.get("/recent-games", async (req, res) => {
+  try {
+    const { data, error } = await supabase.from("Games")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(10);;
+    if (error) {
+      throw error;
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    res.status(500).json({ error: "Erro ao buscar dados" });
+  }
+});
+
+app.get("/search-game/:query", async (req, res) => {
+
+    const { query } = req.params.query
+
+    try {
+      const { data, error } = await supabase
+        .from('Games')
+        .select()
+        .ilike('name', '%' + query + '%')
+      if (error) {
+        throw error
+      }
+      res.json(data);
+      
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+      res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+});
+
 // Função para obter dados da tabela 'games' com base em um ID específico
 app.get("/games/:id", async (req, res) => {
   try {
