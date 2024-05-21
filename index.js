@@ -1,8 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const { createClient } = require("@supabase/supabase-js");
-const cors = require('cors');
-
+const cors = require("cors");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -31,10 +30,11 @@ app.get("/games", async (req, res) => {
 
 app.get("/recent-games", async (req, res) => {
   try {
-    const { data, error } = await supabase.from("Games")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(10);;
+    const { data, error } = await supabase
+      .from("Games")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(10);
     if (error) {
       throw error;
     }
@@ -47,23 +47,21 @@ app.get("/recent-games", async (req, res) => {
 });
 
 app.get("/search-game/:query", async (req, res) => {
-  
-    const { query } = req.params;
-   
-    try {
-      const { data, error } = await supabase
-        .from('Games')
-        .select("*")
-        .ilike('name', '%' + query + '%')
-      if (error) {
-        throw error
-      }
-      res.json(data);
+  const { query } = req.params;
 
-    } catch (error) {
-      console.error("Erro ao buscar dados:", error);
-      res.status(500).json({ error: "Erro ao buscar dados" });
+  try {
+    const { data, error } = await supabase
+      .from("Games")
+      .select("*")
+      .ilike("name", "%" + query + "%");
+    if (error) {
+      throw error;
     }
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    res.status(500).json({ error: "Erro ao buscar dados" });
+  }
 });
 
 // Função para obter dados da tabela 'games' com base em um ID específico
@@ -73,7 +71,8 @@ app.get("/games/:id", async (req, res) => {
     const { data, error } = await supabase
       .from("Games")
       .select("*")
-      .eq("id", gameId);
+      .eq("id", gameId)
+      .single();
 
     if (error) {
       throw error;
@@ -137,6 +136,76 @@ app.delete("/delete-game/:id", async (req, res) => {
   } catch (err) {
     console.error("Erro ao deletar o jogo:", err);
     return res.status(500).json({ error: "Erro ao deletar o jogo" });
+  }
+});
+
+app.get("/reviews/:id", async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const { data, error } = await supabase
+      .from("Reviews")
+      .select(
+        `
+      id,
+      game_id,
+      user_id,
+      star_rating,
+      review_body,
+      profiles (
+        id,
+        username,
+        avatar_url
+      )
+      `
+      )
+      .eq("game_id", gameId);
+
+    if (error) {
+      throw error;
+    }
+
+    // Devolver os dados como JSON
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    res.status(500).json({ error: "Erro ao buscar dados" });
+  }
+});
+
+app.get("/user-reviews/:id", async (req, res) => {
+  try {
+    const user_id = req.params.id;
+    const { data, error } = await supabase
+      .from("Reviews")
+      .select(
+        `
+      id,
+      game_id,
+      user_id,
+      star_rating,
+      review_body,
+      profiles (
+        id,
+        username,
+        avatar_url
+      ),
+      Games (
+        game_id,
+        name,
+        header_image
+      )`
+      )
+      .eq("user_id", user_id);
+
+    if (error) {
+      throw error;
+    }
+
+    // Devolver os dados como JSON
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    res.status(500).json({ error: "Erro ao buscar dados" });
   }
 });
 
