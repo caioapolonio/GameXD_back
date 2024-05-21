@@ -209,6 +209,97 @@ app.get("/user-reviews/:id", async (req, res) => {
   }
 });
 
+app.post("/send-review", async (req, res) => {
+  const {
+    id,
+    user_id,
+    review_body,
+    star_rating,
+    
+  } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from("Reviews")
+      .insert({
+        game_id: id,
+        user_id: user_id,
+        review_body: review_body,
+        star_rating: star_rating,
+      })
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao atualizar o jogo:", err);
+    return res.status(500).json({ error: "Erro ao atualizar o jogo" });
+  }
+});
+
+
+
+app.get("/check-user-review/:user_id/:game_id", async (req, res) => {
+  const user_id = req.params.user_id
+  const game_id = req.params.game_id
+
+  try {
+    const { data, error } = await supabase
+        .from("Reviews")
+        .select(
+          `
+        game_id,
+        user_id
+      `,
+        )
+        .match({ user_id: user_id, game_id: game_id });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao atualizar o jogo:", err);
+    return res.status(500).json({ error: "Erro ao atualizar o jogo" });
+  }
+});
+
+app.put("/update-review", async (req, res) => {
+  const {
+    id,
+    user_id,
+    review_body,
+    star_rating,
+    
+  } = req.body;
+
+  try {
+    const { data, error } = await supabase
+      .from("Reviews")
+      .update({
+        review_body: review_body,
+        star_rating: star_rating,
+      })
+      .match({ user_id: user_id, game_id: id });
+
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao atualizar o jogo:", err);
+    return res.status(500).json({ error: "Erro ao atualizar o jogo" });
+  }
+});
+ 
+ 
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
