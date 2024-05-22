@@ -64,7 +64,6 @@ app.get("/search-game/:query", async (req, res) => {
   }
 });
 
-// Função para obter dados da tabela 'games' com base em um ID específico
 app.get("/games/:id", async (req, res) => {
   try {
     const gameId = req.params.id;
@@ -77,8 +76,6 @@ app.get("/games/:id", async (req, res) => {
     if (error) {
       throw error;
     }
-
-    // Devolver os dados como JSON
     res.json(data);
   } catch (error) {
     console.error("Erro ao buscar dados:", error);
@@ -86,7 +83,6 @@ app.get("/games/:id", async (req, res) => {
   }
 });
 
-//Rota para realizar a atualização do game
 app.put("/update-game", async (req, res) => {
   const {
     id,
@@ -122,7 +118,6 @@ app.put("/update-game", async (req, res) => {
   }
 });
 
-// Rota para deletar um jogo da tabela 'Games' no Supabase pelo id
 app.delete("/delete-game/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -164,7 +159,6 @@ app.get("/reviews/:id", async (req, res) => {
       throw error;
     }
 
-    // Devolver os dados como JSON
     res.json(data);
   } catch (error) {
     console.error("Erro ao buscar dados:", error);
@@ -201,7 +195,6 @@ app.get("/user-reviews/:id", async (req, res) => {
       throw error;
     }
 
-    // Devolver os dados como JSON
     res.json(data);
   } catch (error) {
     console.error("Erro ao buscar dados:", error);
@@ -210,23 +203,15 @@ app.get("/user-reviews/:id", async (req, res) => {
 });
 
 app.post("/send-review", async (req, res) => {
-  const {
-    id,
-    user_id,
-    review_body,
-    star_rating,
-    
-  } = req.body;
+  const { id, user_id, review_body, star_rating } = req.body;
 
   try {
-    const { data, error } = await supabase
-      .from("Reviews")
-      .insert({
-        game_id: id,
-        user_id: user_id,
-        review_body: review_body,
-        star_rating: star_rating,
-      })
+    const { data, error } = await supabase.from("Reviews").insert({
+      game_id: id,
+      user_id: user_id,
+      review_body: review_body,
+      star_rating: star_rating,
+    });
 
     if (error) {
       return res.status(500).json({ error: error.message });
@@ -239,22 +224,15 @@ app.post("/send-review", async (req, res) => {
   }
 });
 
-
-
 app.get("/check-user-review/:user_id/:game_id", async (req, res) => {
-  const user_id = req.params.user_id
-  const game_id = req.params.game_id
+  const user_id = req.params.user_id;
+  const game_id = req.params.game_id;
 
   try {
     const { data, error } = await supabase
-        .from("Reviews")
-        .select(
-          `
-        game_id,
-        user_id
-      `,
-        )
-        .match({ user_id: user_id, game_id: game_id });
+      .from("Reviews")
+      .select("*")
+      .match({ user_id: user_id, game_id: game_id });
 
     if (error) {
       return res.status(500).json({ error: error.message });
@@ -268,13 +246,7 @@ app.get("/check-user-review/:user_id/:game_id", async (req, res) => {
 });
 
 app.put("/update-review", async (req, res) => {
-  const {
-    id,
-    user_id,
-    review_body,
-    star_rating,
-    
-  } = req.body;
+  const { id, user_id, review_body, star_rating } = req.body;
 
   try {
     const { data, error } = await supabase
@@ -284,7 +256,6 @@ app.put("/update-review", async (req, res) => {
         star_rating: star_rating,
       })
       .match({ user_id: user_id, game_id: id });
-
 
     if (error) {
       return res.status(500).json({ error: error.message });
@@ -296,10 +267,7 @@ app.put("/update-review", async (req, res) => {
     return res.status(500).json({ error: "Erro ao atualizar o jogo" });
   }
 });
- 
- 
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
-
