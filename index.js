@@ -268,6 +268,90 @@ app.put("/update-review", async (req, res) => {
   }
 });
 
+app.post("/send-favorite", async (req, res) => {
+  const { id, user_id } = req.body;
+
+  try {
+    const { data, error } = await supabase.from("user_favorite_game").insert({
+      game_id: id,
+      user_id: user_id,
+    });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao favoritar o jogo:", err);
+    return res.status(500).json({ error: "Erro ao favoritar o jogo" });
+  }
+});
+
+app.delete("/delete-favorite/:game_id/:user_id", async (req, res) => {
+  const { game_id, user_id } = req.params;
+  try {
+    const { data, error } = await supabase
+      .from("user_favorite_game")
+      .delete()
+      .match({ game_id: game_id, user_id: user_id });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json({ message: "Jogo deletado com sucesso", data });
+  } catch (err) {
+    console.error("Erro ao deletar o jogo:", err);
+    return res.status(500).json({ error: "Erro ao deletar o jogo" });
+  }
+});
+
+app.get("/check-favorite/:user_id/:game_id", async (req, res) => {
+  const user_id = req.params.user_id;
+  const game_id = req.params.game_id;
+
+  try {
+    const { data, error } = await supabase
+      .from("user_favorite_game")
+      .select("*")
+      .match({ user_id: user_id, game_id: game_id });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao checar :", err);
+    return res.status(500).json({ error: "Erro ao atualizar o jogo" });
+  }
+});
+
+app.get("/favorites/:user_id", async (req, res) => {
+  const user_id = req.params.user_id;
+  try {
+    const { data, error } = await supabase
+      .from("user_favorite_game")
+      .select(
+        `
+      *,
+      Games(*)
+      `
+      )
+      .eq("user_id", user_id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao obter dados de favoritos :", err);
+    return res.status(500).json({ error: "Erro ao atualizar o jogo" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
