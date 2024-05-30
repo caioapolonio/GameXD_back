@@ -352,6 +352,112 @@ app.get("/favorites/:user_id", async (req, res) => {
   }
 });
 
+app.get("/foruns", async (req, res) => {
+  try {
+    const { data, error } = await supabase.from("Foruns").select(
+      `*,
+    profiles (*)
+    `
+    );
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao carregar foruns", err);
+    return res.status(500).json({ error: "Erro ao carregar foruns" });
+  }
+});
+
+app.get("/forum-comments/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from("forum_has_comments")
+      .select(
+        `*,
+    profiles (*)
+  `
+      )
+      .eq("forum_id", id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao carregar forum", err);
+    return res.status(500).json({ error: "Erro ao carregar forum" });
+  }
+});
+
+app.get("/forum/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from("Foruns")
+      .select(
+        `*,
+    profiles (*)
+    `
+      )
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao carregar forum", err);
+    return res.status(500).json({ error: "Erro ao carregar forum" });
+  }
+});
+app.post("/new-forum", async (req, res) => {
+  const { user_id, title, description } = req.body;
+
+  try {
+    const { data, error } = await supabase.from("Foruns").insert({
+      user_id: user_id,
+      title: title,
+      description: description,
+    });
+
+    if (error) {
+      throw error;
+    }
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao criar forum o jogo:", err);
+    return res.status(500).json({ error: "Erro ao criar forum" });
+  }
+});
+
+app.post("/new-comment", async (req, res) => {
+  const { user_id, forum_id, comment } = req.body;
+
+  try {
+    const { data, error } = await supabase.from("forum_has_comments").insert({
+      user_id: user_id,
+      forum_id: forum_id,
+      comment: comment,
+    });
+
+    if (error) {
+      throw error;
+    }
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao criar forum o jogo:", err);
+    return res.status(500).json({ error: "Erro ao criar forum" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
