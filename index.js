@@ -9,6 +9,10 @@ const supabase = createClient(
 );
 
 const app = express();
+const forumRoutes = require("./Routes/forum");
+
+// Usar rotas
+app.use("/forums", forumRoutes);
 app.use(express.json());
 app.use(cors());
 
@@ -159,6 +163,32 @@ app.get("/reviews/:id", async (req, res) => {
       throw error;
     }
 
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    res.status(500).json({ error: "Erro ao buscar dados" });
+  }
+});
+
+app.get("/reviews", async (req, res) => {
+  try {
+    const { data, error } = await supabase.from("Reviews").select("*");
+    if (error) {
+      throw error;
+    }
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar dados:", error);
+    res.status(500).json({ error: "Erro ao buscar dados" });
+  }
+});
+
+app.get("/profiles", async (req, res) => {
+  try {
+    const { data, error } = await supabase.from("profiles").select("*");
+    if (error) {
+      throw error;
+    }
     res.json(data);
   } catch (error) {
     console.error("Erro ao buscar dados:", error);
@@ -418,6 +448,7 @@ app.get("/forum/:id", async (req, res) => {
     return res.status(500).json({ error: "Erro ao carregar forum" });
   }
 });
+
 app.post("/new-forum", async (req, res) => {
   const { user_id, title, description } = req.body;
 
