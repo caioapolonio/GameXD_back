@@ -1,31 +1,81 @@
-const { createClient } = require("@supabase/supabase-js");
-const express = require("express");
-require("dotenv").config();
-const cors = require("cors");
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANONKEY
-);
+const forumModel = require("../models/forumModel");
 
-const app = express();
-app.use(cors());
 
-exports.createForum = async (req, res) => {
+const createComment = (supabase) => async (req, res) => {
+  const { user_id, forum_id, comment } = req.body;
+
+  try {
+    const data = await forumModel.createComment(
+      supabase,
+      user_id,
+      forum_id,
+      comment
+    );
+
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao criar comentário:", err);
+    return res.status(500).json({ error: "Erro ao criar comentário" });
+  }
+};
+
+const createForum = (supabase) => async (req, res) => {
   const { user_id, title, description } = req.body;
 
   try {
-    const { data, error } = await supabase.from("Foruns").insert({
-      user_id: user_id,
-      title: title,
-      description: description,
-    });
+    const data = await forumModel.createForum(
+      supabase,
+      user_id,
+      title,
+      description
+    );
 
-    if (error) {
-      throw error;
-    }
     return res.json(data);
   } catch (err) {
     console.error("Erro ao criar fórum:", err);
     return res.status(500).json({ error: "Erro ao criar fórum" });
   }
 };
+
+const getAllForums = (supabase) => async (req, res) => {
+  try {
+    const data = await forumModel.getAllForums(supabase);
+    return res.json(data);
+  } catch (err) {
+    console.log("Erro ao carregar fóruns:", err);
+    return res.status(500).json({ error: "Erro ao carregar fóruns" });
+  }
+};
+
+const getForumById = (supabase) => async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const data = await forumModel.getForumById(supabase, id);
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao carregar fórum:", err);
+    return res.status(500).json({ error: "Erro ao carregar fórum" });
+  }
+};
+
+const getForumComments = (supabase) => async (req, res) => {
+  const { forum_id } = req.params;
+
+  try {
+    const data = await forumModel.getForumComments(supabase, forum_id);
+    return res.json(data);
+  } catch (err) {
+    console.error("Erro ao carregar fórum:", err);
+    return res.status(500).json({ error: "Erro ao carregar fórum" });
+  }
+}; 
+
+module.exports = {
+  createComment,
+  createForum,
+  getAllForums,
+  getForumById,
+  getForumComments
+};
+
